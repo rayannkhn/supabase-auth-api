@@ -18,7 +18,16 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="Supabase Auth API", lifespan=lifespan)
+app = FastAPI(
+    title="Supabase Auth API",
+    description=(
+        "Signup, login, logout, and protected routes backed by Supabase Auth. "
+        "Click **Authorize** and paste an access token (no `Bearer ` prefix needed) "
+        "to call the padlocked routes below."
+    ),
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
 app.include_router(public_routes.router)
 app.include_router(auth_routes.router)
