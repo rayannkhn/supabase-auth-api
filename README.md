@@ -80,10 +80,7 @@ Swagger UI and executed `/protected/profile` via **Try it out** — response `20
 the real user's `id`, `email`, and `created_at`, and the generated `curl` command showed
 the `Authorization: Bearer` header being sent correctly.
 
-**Screenshot pending** — captured the same result as structured page data instead of a
-screenshot image this round. Take one yourself (Authorize → paste a token → Try it out
-on `/protected/profile`), save it at `docs/swagger-screenshot.png`, and reference it here
-as `![Swagger UI screenshot](docs/swagger-screenshot.png)`.
+![Swagger UI screenshot](docs/swagger-screenshot.png)
 
 ## Verification checklist
 
@@ -112,4 +109,5 @@ as `![Swagger UI screenshot](docs/swagger-screenshot.png)`.
       `admin.sign_out(token)` actually invalidates that specific session server-side.
 - [x] Public GitHub repo with 8 clean commits (Stage 0 through Stage 6, plus one bug
       fix found during real-project testing — `load_dotenv()` was missing).
-- [ ] Swagger screenshot image still needed (see above).
+- [x] Swagger screenshot captured showing a successful authorized `/protected/profile`
+      call (see above).
