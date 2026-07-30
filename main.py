@@ -5,6 +5,8 @@ from fastapi import FastAPI
 
 import core.supabase_client  # noqa: F401  (initializes the client at import time)
 from routes import auth as auth_routes
+from routes import protected as protected_routes
+from routes import public as public_routes
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("supabase_auth_api")
@@ -18,7 +20,9 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="Supabase Auth API", lifespan=lifespan)
 
+app.include_router(public_routes.router)
 app.include_router(auth_routes.router)
+app.include_router(protected_routes.router)
 
 
 if __name__ == "__main__":
