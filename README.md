@@ -75,26 +75,41 @@ that dependency depends on FastAPI's `HTTPBearer` security scheme, which FastAPI
 automatically registers in the OpenAPI spec. Click **Authorize**, paste an access token
 (no `Bearer ` prefix — Swagger adds it), and **Try it out** on `/protected/profile`.
 
-**Screenshot pending** — needs a real Supabase project's access token to demonstrate a
-successful authorized call. Once available, drop it at `docs/swagger-screenshot.png`
-and reference it here as `![Swagger UI screenshot](docs/swagger-screenshot.png)`.
+Verified against a real Supabase project: authorized with a live access token in the
+Swagger UI and executed `/protected/profile` via **Try it out** — response `200` with
+the real user's `id`, `email`, and `created_at`, and the generated `curl` command showed
+the `Authorization: Bearer` header being sent correctly.
+
+**Screenshot pending** — captured the same result as structured page data instead of a
+screenshot image this round. Take one yourself (Authorize → paste a token → Try it out
+on `/protected/profile`), save it at `docs/swagger-screenshot.png`, and reference it here
+as `![Swagger UI screenshot](docs/swagger-screenshot.png)`.
 
 ## Verification checklist
 
 - [x] Server starts with a single documented command (`python main.py`) and logs
       `Server running and connected to Supabase`.
-- [x] `.env` gitignored, `.env.example` committed with placeholders only.
-- [x] `/auth/signup` and `/auth/login` call Supabase Auth and return the documented
-      status codes — verified against the real error paths (bad URL/key → caught
-      exceptions → 400/401), pending a full run against a real Supabase project.
+- [x] `.env` gitignored, `.env.example` committed with placeholders only — confirmed on
+      the pushed GitHub repo (`.env` absent, `.env.example` present).
+- [x] `/auth/signup` and `/auth/login` verified against a real Supabase project: signup
+      returned `201` with a real user object, login returned `200` with a real
+      `access_token`/`refresh_token`.
 - [x] `/protected/profile` extracts and verifies the bearer token via
-      `get_current_user`.
-- [x] Status codes verified end-to-end at every stage: 201 signup, 200 login/read,
-      204 logout, 400 missing inputs, 401 missing/malformed/invalid/expired token.
-- [x] Auth check extracted into a single reusable dependency, applied to 3 routes.
-- [x] Swagger `/docs` confirmed (via the generated `openapi.json`) to apply the
-      `HTTPBearer` security scheme to exactly `/protected/profile`,
-      `/protected/dashboard`, and `/auth/logout` — nowhere else.
-- [ ] Full signup → login → profile → logout flow tested against a real Supabase
-      project, with a Swagger screenshot.
-- [x] Public GitHub repo with staged commits (Stage 0 through Stage 6).
+      `get_current_user` — verified with a real token (`200` + real user data), a
+      tampered token (`401` invalid/expired), and no header (`401` access token
+      required).
+- [x] Status codes verified end-to-end, against a real Supabase project: `201` signup,
+      `200` login/read, `204` logout, `400` missing inputs, `401` missing/malformed/
+      invalid/expired token.
+- [x] Auth check extracted into a single reusable dependency, applied to 3 routes
+      (`/protected/profile`, `/protected/dashboard`, `/auth/logout`).
+- [x] Swagger `/docs` confirmed to apply the `HTTPBearer` security scheme to exactly
+      those 3 routes, and a live Authorize → Try it out run against `/protected/profile`
+      succeeded with a real token.
+- [x] **Logout genuinely revokes the token**, not just a 204 no-op: the same access
+      token that returned `200` from `/protected/profile` before logout returned `401`
+      "Invalid or expired token" after calling `/auth/logout` — confirms
+      `admin.sign_out(token)` actually invalidates that specific session server-side.
+- [x] Public GitHub repo with 8 clean commits (Stage 0 through Stage 6, plus one bug
+      fix found during real-project testing — `load_dotenv()` was missing).
+- [ ] Swagger screenshot image still needed (see above).
