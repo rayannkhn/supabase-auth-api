@@ -1,8 +1,10 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
+from auth.dependencies import bearer_scheme, get_current_user
 from core.supabase_client import supabase
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -48,3 +50,24 @@ async def login(payload: Credentials):
         "access_token": response.session.access_token,
         "refresh_token": response.session.refresh_token,
     }
+
+
+@router.post("/logout", status_code=204)
+async def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    _user=Depends(get_current_user),
+):
+    # _user enforces that this route is only reachable with a verified
+    # token (via the shared get_current_user dependency). We separately
+    # depend on bearer_scheme to get the raw token string for sign_out --
+    # FastAPI caches dependency results per-request, so this does not
+    # re-parse the header or duplicate any verification logic.
+    #
+    # supabase.auth.sign_out() (no args) only signs out whatever session is
+    # cached inside this client instance -- meaningless here since one
+    # global client serves every user. supabase.auth.admin.sign_out(jwt) is
+    # the SDK's own documented way to revoke an arbitrary caller-supplied
+    # token, which requires the client to be built with the service_role
+    # key (see core/supabase_client.py).
+    supabase.auth.admin.sign_out(credentials.credentials)
+    return Response(status_code=204)
